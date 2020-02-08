@@ -1,0 +1,158 @@
+{% extends 'layout/layout.html' %}
+
+{% block title %} - Edit Profile {% endblock %}
+
+{% block alert_title %} Error {% endblock %}
+
+{% block alert_btn %}
+<a class="btn btn-{{category}} btn-block border" href="/profile/details/{{ current_user.id }}">Continue</a> 
+{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top: 120px;">
+    <div class="row">
+        <div class="col-md-3">
+            <h3>{{ current_user.username }}</h3>
+            <hr>
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-5">
+            <h3>Profile Details</h3>
+            <hr>
+            <form action="/profile/details/{{ current_user.id }}" method="post">
+                {{ form.hidden_tag() }}
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ form.status.label }}
+                            {{ form.status(class='form-control') }}
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            {{ form.phone.label }}
+                            {% if form.phone.errors %}
+                            {{ form.phone(class='form-control is-invalid', placeholder=profile[0].phone) }}
+                            <div class="invalid-feedback">
+                                {% for error in form.phone.errors %}
+                                <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            {{ form.phone(class='form-control', placeholder=profile[0].phone) }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    {{ form.company.label }}
+                    {% if form.company.errors %}
+                    {{ form.company(class='form-control is-invalid', placeholder=profile[0].company) }}
+                    <div class="invalid-feedback">
+                        {% for error in form.company.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    {{ form.company(class='form-control', placeholder=profile[0].company) }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.hometown.label }}
+                    {% if form.hometown.errors %}
+                    {{ form.hometown(class='form-control is-invalid', placeholder=profile[0].hometown) }}
+                    <div class="invalid-feedback">
+                        {% for error in form.hometown.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    {{ form.hometown(class='form-control', placeholder=profile[0].hometown) }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.location.label }}
+                    {% if form.location.errors %}
+                    {{ form.location(class='form-control is-invalid', placeholder=profile[0].location) }}
+                    <div class="invalid-feedback">
+                        {% for error in form.location.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    {{ form.location(class='form-control', placeholder=profile[0].location) }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.bio.label }}
+                    {{ form.bio(class='form-control', placeholder=profile[0].bio) }}
+                </div>
+                {{ form.submit(class='btn border') }}
+            </form>
+        </div>
+        <div class="col-md-3" style="display: flex; flex-direction: column; justify-content: start; align-items: center;">
+            <h3>Profile Images</h3>
+            <br>
+            <div class="profile-img" style="display: flex; justify-content: center;">
+                {% if current_user.profile %}
+                <img src="/static/uploads/{{current_user.profile[0].photo}}" alt="{{current_user.profile[0].photo}}" id="profile-img">
+                <label for="photo" class="upload-label">
+                    <span>
+                        <input type="file" name="photo" id="photo" class="upload-input">
+                        <i class="fa fa-camera" aria-hidden="true" class="upload-icon"></i>
+                    </span>
+                </label>
+                {% endif %}
+            </div>
+            <img id="uploading" src="/static/icons/loading.gif" alt="Loading..." style="display: none;">
+            <br>
+            
+        </div>
+    </div>
+    
+</div>
+
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready(function(){
+            $('#photo').on('change', function(){
+                $('#uploading').show()
+                var photo = document.querySelector('#photo').files[0]
+                var filesize = photo.size
+                var filename = photo.name
+                var extension = filename.split('.').pop().toLowerCase();
+                if (jQuery.inArray(extension, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
+                    alert('Invalid image file!')
+                }
+                if (filesize > 2000000) {
+                    alert('Image size is exceeded the maximum!')
+                }
+                else {
+                    var data = new FormData()
+                    data.append('file', photo)
+                    $.ajax({
+                        url: '/profile/photo/{{ current_user.id }}',
+                        method: 'POST',
+                        data: data,
+                        contentType: false,
+                        cache: false,
+                        processData: false,
+                        beforeSend: function() {
+                            console.log('loading...')
+                        },
+                        success: function(data) {
+                            setTimeout(function(){
+                                console.log(data.path)
+                                $('#uploading').hide()
+                                $('#profile-img').attr('src', '/static/uploads/' + data.path)
+                            },3000); 
+                            
+                        }
+                    })
+                }
+            })
+        })
+    </script>
+{% endblock %}

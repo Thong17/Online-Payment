@@ -1,0 +1,18 @@
+{% extends 'layout/layout.html' %}
+
+{% block alert_title %} Warning {% endblock %}
+
+{% block alert_btn %}
+<a class="btn btn-{{category}} btn-block border" href="/verify">Verify</a>   
+{% endblock %}
+
+{% block content %}
+<div class="loading-page">
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+<div class="container" style="margin-top: 150px;">
+    <h1>Hello</h1>
+</div>
+{% endblock %}
