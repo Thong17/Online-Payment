@@ -1,0 +1,77 @@
+{% extends 'layout/layout.html' %}
+
+{% block title %} - Edit {% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top: 120px;">
+    <a href="/products">Back</a>
+    <h3>Edit Product</h3>
+    <br>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="profile">
+                <div class="profile-img">
+                    <img id="product-img" src="/static/uploads/{{product.photo}}" alt="{{product.photo}}"
+                        style="object-fit: contain; object-position: center;">
+                    <label for="photo" class="upload-label">
+                        <span>
+                            <input type="file" name="photo" id="photo" class="upload-input">
+                            <i class="fa fa-camera" aria-hidden="true" class="upload-icon"
+                                style="color: rgba(0, 0, 0, 0.1);"></i>
+                        </span>
+                    </label>
+                    <img id="uploading" src="/static/icons/loading.gif" alt="Loading..." class="uploading">
+                </div>
+            </div>
+
+            <div class="product-colors">
+            {% for color in product.colors %}
+                <div class="dot" style="background-color: {{color.hex}};" title="{{color.color}}"></div>
+            {% endfor %}
+            </div>
+            <hr>
+            <form action="/product/edit/{{product.id}}" method="post">
+                <div class="form-group">
+                    <label for="model">Model</label>
+                    <input type="text" class="form-control" value="{{product.model}}">
+                </div>
+                <input type="submit" value="Save" class="btn border btn-block">
+            </form>
+        </div>
+        <div class="col-md-9">
+            <select name="details" id="details" class="form-control">
+                {% for name in product.details %}
+                <option value="{{name.id}}">{{name.name}}</option>
+                {% endfor %}
+            </select>
+            <br>
+            <div class="product-details">
+                <h3 style="text-align: center;">{{product.details[0].name}}</h3>
+                <br>
+                <h3>Color</h3>
+                <div class="details-colors">
+                    {% for color in product.colors %}
+                        <p>{{color.color}}</p>
+                    {% endfor %}
+                </div>
+                <hr>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready(function(){
+            $("select#detail1").change(function(){
+                var id = $(this).children("option:selected").val();
+                console.log(id)
+            });
+            $("select#detail2").change(function(){
+                var id = $(this).children("option:selected").val();
+                console.log(id)
+            });
+        });
+    </script>
+{% endblock %}

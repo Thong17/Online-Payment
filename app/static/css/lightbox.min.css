@@ -178,13 +178,14 @@ body.lb-disable-scrolling {
     display: block;
     position: absolute;
     top: 0;
-    right: 30px;
+    right: 60px;
     float: right;
     width: 30px;
     height: 30px;
     background: url(../icons/close.png) top right no-repeat;
     text-align: right;
     outline: 0;
+    z-index: 100;
     filter: alpha(Opacity=70);
     opacity: .7;
     -webkit-transition: opacity .2s;

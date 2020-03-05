@@ -1,0 +1,29 @@
+{% extends 'layout/layout.html' %}
+
+{% block title %} - Details {% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top: 120px;">
+    {% if product %}
+    <div class="row">
+        <div class="col-md-3">
+            <div class="item-img">
+                <img src="/static/uploads/{{product.details.photo}}" alt="{{product.details.photo}}">
+            </div>
+            <div class="item-colors">
+                <div class="color-dot">
+                    {% if product.details.colors %}
+                        {% for color in product.details.colors %}
+                            <div class="dot" style="background-color: {{color.hex}};" title="{{color.color}}"></div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

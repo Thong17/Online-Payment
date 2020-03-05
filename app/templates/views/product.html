@@ -1,0 +1,631 @@
+{% extends 'layout/layout.html' %}
+
+{% block title %} - Products {% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css"/> <!-- 'classic' theme -->
+{% endblock %}
+
+{% block content %}
+
+<div class="loading-page">
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+<div class="container" style="margin-top: 120px;">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="product-header">
+                <h3 class="title">
+                    Products
+                    <button type="button" class="btn border" data-toggle="modal" data-target="#addProduct">
+                        +
+                    </button>
+                </h3>
+                <!-- The Modal -->
+                <div class="modal fade" id="addProduct">
+                    <div class="modal-dialog modal-dialog-centered modal-xl">
+                        <div class="modal-content">
+
+                            <!-- Modal Header -->
+                            <div class="modal-header">
+                                <h4 class="modal-title">Add Product</h4>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+
+                            <!-- Modal body -->
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="profile">
+                                            <div class="profile-img">
+                                                <img id="product-img" src="/static/uploads/no-photo.png" alt="No image found"
+                                                    style="object-fit: contain; object-position: center;">
+                                                <label for="photo" class="upload-label">
+                                                    <span>
+                                                        <input type="file" name="photo" id="photo" class="upload-input">
+                                                        <i class="fa fa-camera" aria-hidden="true" class="upload-icon"
+                                                            style="color: rgba(0, 0, 0, 0.1);"></i>
+                                                    </span>
+                                                </label>
+                                                <img id="uploading" src="/static/icons/loading.gif" alt="Loading..." class="uploading">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="brand">Brand</label>
+                                                    <div class="animate-form">
+                                                        <select name="brand" id="brand" class="form-control">
+                                                            {% if brands %}
+                                                                {% for brand in brands %}
+                                                                    <option value="{{brand.id}}">{{brand.brand}}</option>
+                                                                {% endfor %}
+                                                            {% else %}
+                                                                <option value="">No option</option>
+                                                            {% endif %}
+                                                        </select>
+                                                        <input type="text" class="form-control select-inp-brand" id="inpBrand" placeholder="Brand">
+                                                        <button class="btn border select-btn-brand" id="btnBrand">+</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+
+                                                <div class="form-group">
+                                                    <label for="createBy">CreateBy</label>
+                                                    <input type="text" class="form-control" name="createBy"
+                                                        value="{{current_user.username}}" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="model">Model</label>
+                                                    <div class="animate-form">
+                                                        <select name="model" id="model" class="form-control">
+                                                            {% if products %}
+                                                                {% for model in products %}
+                                                                    <option value="{{model.id}}">{{model.model}}</option>
+                                                                {% endfor %}
+                                                            {% else %}
+                                                                <option value="">No option</option>
+                                                            {% endif %}
+                                                        </select>
+                                                        <input type="text" class="form-control select-inp" id="inpModel" placeholder="Model">
+                                                        <button class="btn border" id="btnModel">+</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="color">Color</label>
+                                                    <div class="animate-form">
+                                                        <input type="text" class="form-control" id="inpColor" placeholder="Color">
+                                                        <div class="color-picker" id="colorPicked"></div>
+                                                        <select name="color" id="color" class="btn" style="width: 20px;">
+                                                            <option value="">No color added</option>
+                                                        </select>
+                                                        <button class="btn border" id="btnColor">+</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="name">Name</label>
+                                            <input type="text" class="form-control" name="name" id="name" placeholder="Name">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="price">Price</label>
+                                            <input type="text" class="form-control" name="price" id="price" placeholder="Price">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="processor">Processor</label>
+                                            <div class="animate-form">
+                                                <select name="processor" id="processor" class="form-control">
+                                                    {% if processors %}
+                                                        {% for processor in processors %}
+                                                            <option value="{{processor.id}}">{{processor.processor}}</option>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <option value="">No option</option>
+                                                    {% endif %}
+                                                </select>
+                                                <input type="text" class="form-control select-inp" id="inpProcessor" placeholder="Processor">
+                                                <button class="btn border select-btn" id="btnProcessor">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="memory">Memory</label>
+                                            <div class="animate-form">
+                                                <select name="memory" id="memory" class="form-control">
+                                                    {% if memories %}
+                                                        {% for memory in memories %}
+                                                            <option value="{{memory.id}}">{{memory.memory}}</option>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <option value="">No option</option>
+                                                    {% endif %}
+                                                </select>
+                                                <input type="text" class="form-control select-inp" id="inpMemory" placeholder="Memory">
+                                                <button class="btn border select-btn" id="btnMemory">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="graphic">Graphic</label>
+                                            <div class="animate-form">
+                                                <select name="graphic" id="graphic" class="form-control">
+                                                    {% if graphics %}
+                                                        {% for graphic in graphics %}
+                                                            <option value="{{graphic.id}}">{{graphic.graphic}}</option>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <option value="">No option</option>
+                                                    {% endif %}
+                                                </select>
+                                                <input type="text" class="form-control select-inp" id="inpGraphic" placeholder="Graphic">
+                                                <button class="btn border select-btn" id="btnGraphic">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="display">Display</label>
+                                            <div class="animate-form">
+                                                <select name="display" id="display" class="form-control">
+                                                    {% if displays %}
+                                                        {% for display in displays %}
+                                                            <option value="{{display.id}}">{{display.display}}</option>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <option value="">No option</option>
+                                                    {% endif %}
+                                                </select>
+                                                <input type="text" class="form-control select-inp" id="inpDisplay" placeholder="Display">
+                                                <button class="btn border select-btn" id="btnDisplay">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="storage">Storage</label>
+                                            <div class="animate-form">
+                                                <select name="storage" id="storage" class="form-control">
+                                                    {% if storages %}
+                                                        {% for storage in storages %}
+                                                            <option value="{{storage.id}}">{{storage.storage}}</option>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <option value="">No option</option>
+                                                    {% endif %}
+                                                </select>
+                                                <input type="text" class="form-control select-inp" id="inpStorage" placeholder="Storage">
+                                                <button class="btn border select-btn" id="btnStorage">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="battery">Battery</label>
+                                            <div class="animate-form">
+                                                <select name="battery" id="battery" class="form-control">
+                                                    {% if batteries %}
+                                                        {% for battery in batteries %}
+                                                            <option value="{{battery.id}}">{{battery.battery}}</option>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <option value="">No option</option>
+                                                    {% endif %}
+                                                </select>
+                                                <input type="text" class="form-control select-inp" id="inpBattery" placeholder="Battery">
+                                                <button class="btn border select-btn" id="btnBattery">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="camera">Camera</label>
+                                            <div class="animate-form">
+                                                <select name="camera" id="camera" class="form-control">
+                                                    {% if cameras %}
+                                                        {% for camera in cameras %}
+                                                            <option value="{{camera.id}}">{{camera.camera}}</option>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <option value="">No option</option>
+                                                    {% endif %}
+                                                </select>
+                                                <input type="text" class="form-control select-inp" id="inpCamera" placeholder="Camera">
+                                                <button class="btn border select-btn" id="btnCamera">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="audio">Audio</label>
+                                            <div class="animate-form">
+                                                <select name="audio" id="audio" class="form-control">
+                                                    {% if audios %}
+                                                        {% for audio in audios %}
+                                                            <option value="{{audio.id}}">{{audio.audio}}</option>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <option value="">No option</option>
+                                                    {% endif %}
+                                                </select>
+                                                <input type="text" class="form-control select-inp" id="inpAudio" placeholder="Audio">
+                                                <button class="btn border select-btn" id="btnAudio">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <label for="details">Details</label>
+                                            <textarea style="min-height: 70px;" class="form-control" name="details"
+                                                id="details"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input style="float: right;" type="submit" value="Add to list" class="btn border" id="addList">
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <table class="table my-0" id="listTable"></table>
+                                </div>
+                            </div>
+                            <!-- Modal footer -->
+                            <div class="modal-footer">
+                                <button type="button" class="btn" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn border" id="saveProduct">Save</button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="header-actions">
+                    <div class="arrow-left">
+
+                    </div>
+                    <ul>
+                        <li>
+                            <p>Sort by</p>
+                        </li>
+                        <li>
+                            <a href="">Name</a>
+                        </li>
+                        <li>
+                            <a href="">Date</a>
+                        </li>
+                        <li>
+                            <a href="">Size</a>
+                        </li>
+                        <li class="search-container">
+                            <input type="text" class="product-search" placeholder="Search">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="product-body">
+                {% if products %}
+                    {% for model in products %}
+                    <br>
+                    <a href="/product/edit/{{model.id}}">{{model.model}}</a>
+                    <hr>
+                    <div class="product-model">
+                        {% for item in model.details %}
+                        <a class="product-item" href="/product/{{item.id}}">
+                            <div class="item-img">
+                                <img src="static/uploads/{{model.photo}}" alt="{{model.photo}}">
+                            </div>
+                            <div class="item-details">
+                                <p>{{item.name}}</p>
+                                <p>${{item.price}}</p>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p class="no-feedback">No product...</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+<script>
+
+    var colors = []
+    var dhex = '#111111'
+    
+    // Simple example, see optional options for more configuration.
+    const pickr = Pickr.create({
+        el: '.color-picker',
+        theme: 'classic', // or 'monolith', or 'nano'
+        defaultRepresentation: 'HEX',
+        default: '#111111',
+
+        components: {
+
+            // Main components
+            preview: true,
+            opacity: true,
+            hue: true,
+
+            // Input / output Options
+            interaction: {
+                hex: false,
+                rgba: false,
+                hsla: false,
+                hsva: false,
+                cmyk: false,
+                input: true,
+                clear: false,
+                save: true
+            }
+        }
+    })
+
+    pickr.on('save', function(...args){
+        let hex = args[0].toHEXA().toString()
+        dhex = hex
+    })
+
+    $('#btnColor').on('click', function(){
+        var name = $('#inpColor').val()
+        var picked = ''
+        color = {}
+        color.name = name
+        color.hex = dhex
+        colors.push(color)
+        colors.forEach(c => {
+            picked += '<option>'+c.name+'</option>'
+        });
+        $('#color').html(picked)
+
+        $('#inpColor').val('')
+    })
+
+    var listItems = []
+
+    $(document).ready(function () {
+        $('.arrow-left').on('click', function () {
+            $('.header-actions').toggleClass('actions-btn')
+        })
+        $('#btnModel').on('click', function(){
+            var text = $('#inpModel').val()
+            element = ''
+            if (text != '') {
+                element += '<option value="'+text+'">'+text+'</option>'
+                $('#model').append(element)
+                $('#inpModel').val('')
+            }
+            $('#inpModel').toggleClass('animate-inp')
+        })
+        $('.select-btn').on('click', function(){
+            var inp = $(this).closest('.animate-form').children()
+            var inpId = $(inp[1]).attr('id')
+            var text = $('#'+inpId).val()
+            if (text != '') {
+                data = {inpId: inpId}
+                data.value = text
+                $.ajax({
+                    url: '/product/details/add',
+                    type: 'post',
+                    data: data,
+                    beforeSend: function () {
+                        console.log('loading...')
+                    },
+                    success: function(data) {
+                        var id = data['id']
+                        var options = data['options']
+                        var element = ''
+                        options.forEach(option => {
+                            element += '<option value='+option[0]+'>'+option[1]+'</option>'
+                        });
+                        $('#'+id).empty().append(element)
+                        $('#'+inpId).val('')
+                    }
+                })
+            }
+            $('#'+inpId).toggleClass('animate-inp')
+        })
+        $('.select-btn-brand').on('click', function(){
+            var input = $('#inpBrand').val()
+            if (input != '') {
+                $.ajax({
+                    url: '/product/brand/add',
+                    type: 'post',
+                    data: {input: input},
+                    beforeSend: function(){
+                        console.log('loading...')
+                    },
+                    success: function(data){
+                        var brands = data['brands']
+                        var options = ''
+                        brands.forEach(brand => {
+                            options += '<option value='+brand['id']+'>'+brand['brand']+'</option>'
+                        });
+                        $('#brand').empty().append(options)
+                    }
+                })
+                $('#inpBrand').val('')
+            }
+            $('.select-inp-brand').toggleClass('animate-inp')
+        })
+
+        $('#addList').on('click', function(){
+            var brand = $('#brand').val()
+            var model = $('#model').val()
+            var newModel = $('#model option:selected').text()
+            var name = $('#name').val()
+            var price = $('#price').val()
+            var processor = $('#processor').val()
+            var memory = $('#memory').val()
+            var graphic = $('#graphic').val()
+            var display = $('#display').val()
+            var storage = $('#storage').val()
+            var battery = $('#battery').val()
+            var camera = $('#camera').val()
+            var audio = $('#audio').val()
+            var details = $('#details').val()
+
+            var data = {}
+            data.colors = colors
+            data.brand = brand
+            data.model = model
+            data.newModel = newModel
+            data.name = name
+            data.price = price
+            data.processor = processor
+            data.memory = memory
+            data.graphic = graphic
+            data.display = display
+            data.storage = storage
+            data.battery = battery
+            data.camera = camera
+            data.audio = audio
+            data.details = details
+
+            listItems.push(data)
+
+            console.log(listItems)
+
+            var list = `
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Model</th>
+                                <th>Name</th>
+                                <th>Price</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listData">`
+                            
+            var i = 0
+            listItems.forEach(item => {
+                data.id = i
+                var No = i+1
+                list += '<tr class="add-animation" id="list-'+i+'"><td>'+No+'</td><td>'+item.newModel+'</td><td>'+item.name+'</td><td>'+item.price+'$</td><td>'+item.details+'<button class="list-action" id="item-'+i+'" onclick="remove();">+</button></td></tr>'
+                i += 1
+            });
+            list += '</tbody>'
+            $('#listTable').empty().append(list)
+
+            $('#listTable').fadeIn()
+            $('#model').attr('disabled', 'disabled')
+            $('#brand').attr('disabled', 'disabled')
+        })
+        
+        $('#photo').on('change', function() {
+            $('#uploading').show()
+            var photo = document.querySelector('#photo').files[0]
+            var filesize = photo.size
+            var filename = photo.name
+            var extension = filename.split('.').pop().toLowerCase();
+            if (jQuery.inArray(extension, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
+                alert('Invalid image file!')
+                window.location.reload()
+            }
+            if (filesize > 2000000) {
+                alert('Image size is exceeded the maximum!')
+            }
+            else {
+                var data = new FormData()
+                data.append('file', photo)
+                $.ajax({
+                    url: '/product/photo',
+                    method: 'POST',
+                    data: data,
+                    contentType: false,
+                    cache: false,
+                    processData: false,
+                    beforeSend: function () {
+                        console.log('loading...')
+                    },
+                    success: function(data) {
+                        setTimeout(function() {
+                            console.log(data.path)
+                            $('#uploading').hide()
+                            $('#product-img').attr({'src': '/static/uploads/' + data.path, 'alt': data.path})
+                        }, 3000);
+                    }
+                })
+            }
+        })
+        $('#saveProduct').on('click', function(){
+            var photo = document.querySelector('#photo').files[0]
+            var data = new FormData()
+            data.append('file', photo)
+            data.append('items', JSON.stringify(listItems))
+            $.ajax({
+                url: '/product/add',
+                method: 'post',
+                data: data,
+                processData: false,
+                contentType: false,
+                beforeSend: function(){
+                    console.log('loading...')
+                },
+                success: function(data){
+                    alert(data['feedback'])
+                    window.location.replace('/products')
+                }
+            })
+        })
+    })
+    function remove() {
+        $(document).ready(function(){
+            for (let index = 0; index < listItems.length; index++) {
+                var id = document.activeElement.attributes['id'].value
+                var i = id.split('-')[1]
+                const element = listItems[index];
+                console.log(element.id, i)
+                if (element.id == i) {
+                    listItems.splice(index, 1)
+                    $('#list-'+i).fadeOut('slow')
+                }
+            }
+            if (listItems.length == 0) {
+                $('#listTable').fadeOut()
+
+                $('#model').removeAttr('disabled')
+                $('#color').removeAttr('disabled')
+                $('#brand').removeAttr('disabled')
+            }
+            console.log(listItems)
+        })
+    }
+    
+</script>
+{% endblock %}

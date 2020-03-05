@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
 from flask_login import LoginManager, UserMixin
@@ -13,6 +14,7 @@ from wtforms import StringField, PasswordField, TextAreaField, SelectField, Bool
 from wtforms.fields.html5 import DateField, DateTimeLocalField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional
 from flask_uploads import UploadSet, configure_uploads, patch_request_class, IMAGES
+from marshmallow import fields
 
 #Get Base directory
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -30,6 +32,9 @@ safe = URLSafeTimedSerializer(os.environ.get('SECRET_KEY'))
 
 #Query data
 db = SQLAlchemy(app)
+
+#Convert data to JSON
+ma = Marshmallow(app)
 
 #Send mail
 mail = Mail(app)
@@ -74,9 +79,13 @@ class ProfileDetailsForm(FlaskForm):
     bio = TextAreaField('Bio', validators=[Optional()])
     submit = SubmitField('Save')
 
+class PostForm(FlaskForm):
+    title = TextAreaField('Title', validators=[Optional()])
+    photo = FileField('Photo', validators=[FileAllowed(upload), Optional()])
+    submit = SubmitField('Post')
+
 
 #Define Data Model
-
 postLiked = db.Table(
     'postLiked',
     db.Column('post_id', db.String(36), db.ForeignKey('tbl_post.id')),
@@ -108,7 +117,7 @@ class tblUser(db.Model, UserMixin):
 class tblPost(db.Model):
     id = db.Column(db.String(36), primary_key=True)
     title = db.Column(db.Text(), nullable=False)
-    photo = db.Column(db.String(100), nullable=False)
+    photo = db.Column(db.String(100), default='default.png')
     createdOn = db.Column(db.DateTime, default=datetime.utcnow)
     createdBy = db.Column(db.String(36), db.ForeignKey('tbl_user.id'), nullable=False)
 
@@ -116,12 +125,119 @@ class tblProfile(db.Model):
     id = db.Column(db.String(36), primary_key=True)
     photo = db.Column(db.String(255), nullable=True, default='default.png')
     status = db.Column(db.String(20), nullable=True, default='Single')
-    phone = db.Column(db.String(13), nullable=True)
-    company = db.Column(db.String(20), nullable=True)
-    hometown = db.Column(db.String(255), nullable=True)
-    location = db.Column(db.String(255), nullable=True)
-    bio = db.Column(db.Text(), nullable=True)
+    phone = db.Column(db.String(13), nullable=True, default='')
+    company = db.Column(db.String(20), nullable=True, default='')
+    hometown = db.Column(db.String(255), nullable=True, default='')
+    location = db.Column(db.String(255), nullable=True, default='')
+    bio = db.Column(db.Text(), nullable=True, default='')
     user = db.Column(db.String(36), db.ForeignKey('tbl_user.id'), nullable=False)
+
+class tblBrand(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    brand = db.Column(db.String(20), nullable=False)
+    createdOn = db.Column(db.DateTime, default=datetime.utcnow)
+    createdBy = db.Column(db.String(36), db.ForeignKey('tbl_user.id'), nullable=False)
+    product = db.relationship('tblDetails', backref='products', lazy=True)
+
+class tblColor(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    color = db.Column(db.String(20), nullable=False)
+    hex = db.Column(db.String(100), nullable=True, default= '')
+    price = db.Column(db.Numeric(10,2), nullable=True, default=0.00)
+    product = db.Column(db.String(36), db.ForeignKey('tbl_product.id'), nullable=True)
+
+class tblProcessor(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    processor = db.Column(db.String(20), nullable=True, default='')
+    dprocessor = db.relationship('tblDetails', backref='dprocessor', lazy=True)
+    price = db.Column(db.Numeric(10,2), nullable=True, default=0.00)
+
+class tblMemory(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    memory = db.Column(db.String(20), nullable=True, default='')
+    dmemory = db.relationship('tblDetails', backref='dmemory', lazy=True)
+    price = db.Column(db.Numeric(10,2), nullable=True, default=0.00)
+
+class tblGraphic(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    graphic = db.Column(db.String(20), nullable=True, default='')
+    dgraphic = db.relationship('tblDetails', backref='dgraphic', lazy=True)
+    price = db.Column(db.Numeric(10,2), nullable=True, default=0.00)
+
+class tblDisplay(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    display = db.Column(db.String(20), nullable=True, default='')
+    ddisplay = db.relationship('tblDetails', backref='ddisplay', lazy=True)
+    price = db.Column(db.Numeric(10,2), nullable=True, default=0.00)
+
+class tblStorage(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    storage = db.Column(db.String(20), nullable=True, default='')
+    dstorage = db.relationship('tblDetails', backref='dstorage', lazy=True)
+    price = db.Column(db.Numeric(10,2), nullable=True, default=0.00)
+
+class tblBattery(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    battery = db.Column(db.String(50), nullable=True, default='')
+    dbattery = db.relationship('tblDetails', backref='dbattery', lazy=True)
+    price = db.Column(db.Numeric(10,2), nullable=True, default=0.00)
+
+class tblCamera(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    camera = db.Column(db.String(50), nullable=True, default='')
+    dcamera = db.relationship('tblDetails', backref='dcamera', lazy=True)
+    price = db.Column(db.Numeric(10,2), nullable=True, default=0.00)
+
+class tblAudio(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    audio = db.Column(db.String(50), nullable=True, default='')
+    daudio = db.relationship('tblDetails', backref='daudio', lazy=True)
+    price = db.Column(db.Numeric(10,2), nullable=True, default=0.00)
+
+class tblDetails(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    name = db.Column(db.String(20), nullable=True, default='')
+    price = db.Column(db.Numeric(10,2), nullable=True, default=0.00)
+    height = db.Column(db.String(20), nullable=True, default='')
+    width = db.Column(db.String(20), nullable=True, default='')
+    depth = db.Column(db.String(20), nullable=True, default='')
+    weight = db.Column(db.String(20), nullable=True, default='')
+    brand = db.Column(db.String(36), db.ForeignKey('tbl_brand.id'), nullable=False)
+    processor = db.Column(db.String(36), db.ForeignKey('tbl_processor.id'), nullable=False)
+    memory = db.Column(db.String(36), db.ForeignKey('tbl_memory.id'), nullable=False)
+    graphic = db.Column(db.String(36), db.ForeignKey('tbl_graphic.id'), nullable=False)
+    display = db.Column(db.String(36), db.ForeignKey('tbl_display.id'), nullable=False)
+    storage = db.Column(db.String(36), db.ForeignKey('tbl_storage.id'), nullable=False)
+    battery = db.Column(db.String(36), db.ForeignKey('tbl_battery.id'), nullable=False)
+    camera = db.Column(db.String(36), db.ForeignKey('tbl_camera.id'), nullable=False)
+    audio = db.Column(db.String(36), db.ForeignKey('tbl_audio.id'), nullable=False)
+    product = db.Column(db.String(36), db.ForeignKey('tbl_product.id'), nullable=False)
+    note = db.Column(db.Text(), nullable=True, default='')
+
+class tblProduct(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    model = db.Column(db.String(20), nullable=True, default='')
+    colors = db.relationship('tblColor', backref='colors', lazy=True)
+    photo = db.Column(db.String(255), nullable=False, default='no-photo.png')
+    createdOn = db.Column(db.DateTime, default=datetime.utcnow)
+    createdBy = db.Column(db.String(36), db.ForeignKey('tbl_user.id'), nullable=False)
+    details = db.relationship('tblDetails', backref='details', lazy=True)
+
+
+#Define class schema
+class UserSchema(ma.ModelSchema):
+    class Meta:
+        model = tblUser
+
+class PostSchema(ma.ModelSchema):
+    class Meta:
+        model = tblPost
+
+    likedBy = fields.Nested(UserSchema, many=True, only=['id', 'username'])
+
+class BrandSchema(ma.ModelSchema):
+    class Meta:
+        model = tblBrand
 
 
 #Custome function
@@ -132,6 +248,7 @@ def del_ex_file(ex_file, dir_file):
             os.remove(ex_file)
         except:
             return 'No file found'
+
 
 #Get route from route.py
 from app import route
