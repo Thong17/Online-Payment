@@ -1,5 +1,5 @@
 import os, json, sqlite3
-from app import db, app, safe, mail, bcrypt, upload, login_manager, del_ex_file, basedir
+from app import db, app, safe, mail, bcrypt, upload, login_manager, del_ex_file, basedir, mysql
 from app import tblPost, tblUser, tblProfile, tblProduct, tblColor, tblCamera, tblDetails, tblDisplay, tblGraphic, tblMemory, tblProcessor, tblStorage, tblAudio, tblBattery, tblBrand
 from app import PostSchema, UserSchema, BrandSchema
 from app import RegisterForm, LoginForm, ProfileDetailsForm, PostForm
@@ -322,22 +322,19 @@ def products():
 
 @app.route('/product/details/add', methods=['POST'])
 def product_add():
-    con = sqlite3.connect('app/database.db')
+    #con = sqlite3.connect('app/database.db')
     idAttr = request.form['inpId']
     idName = idAttr.split('inp')[1]
     name = idName.lower()
     value = request.form['value']
     id = str(uuid4())
-    try:
-        curser = con.cursor()
-        curser.execute('INSERT INTO tbl_{} VALUES(?, ?, ?)'.format(name), (id, value, 0.00))
-        con.commit()
-        curser.execute('SELECT * FROM tbl_{}'.format(name))
-        options = curser.fetchall()
+    curser = mysql.connection.cursor()
+    curser.execute('INSERT INTO tbl_{} VALUES(%s, %s, %s)'.format(name), (id, value, None))
+    mysql.connection.commit()
+    curser.execute('SELECT * FROM tbl_{}'.format(name))
+    options = curser.fetchall()
 
-        return jsonify({'options': options, 'id': name})
-    except:
-        return 'Failed'
+    return jsonify({'options': options, 'id': name})
 
 
 @app.route('/product/brand/add', methods=['POST'])

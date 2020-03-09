@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from flask import Flask
+from flask_mysqldb import MySQL
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_bcrypt import Bcrypt
@@ -16,19 +17,30 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional
 from flask_uploads import UploadSet, configure_uploads, patch_request_class, IMAGES
 from marshmallow import fields
 
+
 #Get Base directory
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 
+connection = 'mysql+pymysql://root:myroot@localhost/e-commerce'
+# connection = 'sqlite:///database.db'
+
 #Configuration
 app.config.from_pyfile('config.cfg')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = connection
 app.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'static/uploads')
+app.config["MYSQL_HOST"] = "localhost"
+app.config["MYSQL_USER"] = "root"
+app.config["MYSQL_PASSWORD"] = "myroot"
+app.config["MYSQL_DB"] = "e-commerce"
 
 #Requrst token
 safe = URLSafeTimedSerializer(os.environ.get('SECRET_KEY'))
+
+#MySQL config
+mysql = MySQL(app)
 
 #Query data
 db = SQLAlchemy(app)
